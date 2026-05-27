@@ -13,6 +13,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 public record InventoryListener(InvseePlugin instance) implements Listener {
@@ -26,6 +27,9 @@ public record InventoryListener(InvseePlugin instance) implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
+        if (!isSession(event.getInventory())) {
+            return;
+        }
         boolean setEmpty = false;
 
         if (event.getClickedInventory() != null && event.getClickedInventory().getSize() == 45 && event.getSlot() > 41) {
@@ -91,5 +95,9 @@ public record InventoryListener(InvseePlugin instance) implements Listener {
         }
         player.getScheduler().run(this.instance, scheduledTask -> this.instance.getInvseeSessionManager().updateContent(player), null);
         player.getScheduler().run(this.instance, scheduledTask -> this.instance.getEnderseeSessionManager().updateContent(player), null);
+    }
+
+    public boolean isSession(Inventory inv) {
+        return instance.getInvseeSessionManager().isSessionInventory(inv) || instance.getEnderseeSessionManager().isSessionInventory(inv);
     }
 }
