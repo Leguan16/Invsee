@@ -43,7 +43,9 @@ public final class InvseePlugin extends JavaPlugin {
             getLogger().warning("LuckPerms not found. Some features might not work.");
         }
 
-        getServer().getPluginManager().addPermission(new Permission(Constants.LOOKUP_UNSEEN_PERMISSION));
+        if (getServer().getPluginManager().getPermission(Constants.LOOKUP_UNSEEN_PERMISSION) == null) {
+            getServer().getPluginManager().addPermission(new Permission(Constants.LOOKUP_UNSEEN_PERMISSION));
+        }
     }
 
     private void registerCommands() {
