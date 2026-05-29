@@ -7,10 +7,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.TagValueInput;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
@@ -44,7 +47,10 @@ public interface Session {
     default void save() {
         Player cachedPlayer = getCachedPlayer();
         if (cachedPlayer != null) {
-            cachedPlayer.saveData();
+            CraftServer craftServer = (CraftServer) Bukkit.getServer();
+            CraftPlayer craftPlayer = (CraftPlayer) cachedPlayer;
+            // Avoiding Folia's tick thread checks
+            craftServer.getHandle().playerIo.save(craftPlayer.getHandle());
         }
     }
 
@@ -72,7 +78,8 @@ public interface Session {
 
         GameProfile profile = new GameProfile(offlinePlayer.getUniqueId(),
                 offlinePlayer.getName() != null ? offlinePlayer.getName() : offlinePlayer.getUniqueId().toString());
-        MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
+        CraftServer craftServer = (CraftServer) Bukkit.getServer();
+        MinecraftServer server = craftServer.getServer();
         ServerLevel level = server.getLevel(Level.OVERWORLD);
         if (level == null) {
             InvseePlugin.getInstance().getComponentLogger().error(text("Unable to find overworld level", NamedTextColor.RED));
@@ -81,7 +88,11 @@ public interface Session {
 
         ServerPlayer serverPlayer = new ServerPlayer(server, level, profile, ClientInformation.createDefault());
         Player target = serverPlayer.getBukkitEntity();
-        target.loadData();
+
+        // Avoiding Folia's tick thread checks
+        craftServer.getHandle().playerIo.load(serverPlayer.nameAndId())
+                .map(tag -> TagValueInput.create(ProblemReporter.DISCARDING, craftServer.getServer().registryAccess(), tag))
+                .ifPresent(serverPlayer::load);
         cache(target);
         return Optional.of(target);
     }
