@@ -35,12 +35,18 @@ public final class InvseePlugin extends JavaPlugin {
         registerCommands();
         getServer().getPluginManager().registerEvents(new InventoryListener(instance), this);
 
-        RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+        RegisteredServiceProvider<LuckPerms> provider;
+
+        try {
+            provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
+        } catch (NoClassDefFoundError e) {
+            provider = null;
+            getLogger().warning("LuckPerms not found. Some features might not work.");
+        }
+
         if (provider != null) {
             this.luckPerms = provider.getProvider();
             new LuckPermsListener(this, this.luckPerms);
-        } else {
-            getLogger().warning("LuckPerms not found. Some features might not work.");
         }
 
         if (getServer().getPluginManager().getPermission(Constants.LOOKUP_UNSEEN_PERMISSION) == null) {
