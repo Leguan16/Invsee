@@ -49,9 +49,7 @@ public final class InvseePlugin extends JavaPlugin {
             new LuckPermsListener(this, this.luckPerms);
         }
 
-        if (getServer().getPluginManager().getPermission(Constants.LOOKUP_UNSEEN_PERMISSION) == null) {
-            getServer().getPluginManager().addPermission(new Permission(Constants.LOOKUP_UNSEEN_PERMISSION));
-        }
+        getServer().getPluginManager().addPermission(new Permission(Constants.LOOKUP_UNSEEN_PERMISSION));
     }
 
     private void registerCommands() {
