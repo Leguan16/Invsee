@@ -10,6 +10,8 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -33,12 +35,8 @@ public class EnderseeSession implements Session {
         this.uuid = offlinePlayer.getUniqueId();
         this.subscribers = new HashSet<>();
 
-        if (offlinePlayer instanceof Player player) {
-            this.enderchest = Bukkit.createInventory(player, InventoryType.ENDER_CHEST, player.name().append(text("'s enderchest")));
-        } else {
-            String name = offlinePlayer.getName() == null ? "unknown" : offlinePlayer.getName();
-            this.enderchest = InvseePlugin.getInstance().getServer().createInventory(null, InventoryType.ENDER_CHEST, text(name).append(text("'s enderchest")));
-        }
+        String name = offlinePlayer.getName() == null ? "unknown" : offlinePlayer.getName();
+        this.enderchest = InvseePlugin.getInstance().getServer().createInventory(this, InventoryType.ENDER_CHEST, text(name).append(text("'s enderchest")));
 
         updateSubscriberInventory();
         addSubscriber(subscriber);
@@ -94,7 +92,7 @@ public class EnderseeSession implements Session {
     }
 
     @Override
-    public Inventory getInventory() {
+    public @NonNull Inventory getInventory() {
         return this.enderchest;
     }
 
@@ -121,6 +119,11 @@ public class EnderseeSession implements Session {
     @Override
     public Player getCachedPlayer() {
         return this.playerCache.getIfPresent(this.uuid);
+    }
+
+    @Override
+    public boolean isSubscriber(@NotNull UUID whoClicked) {
+        return this.subscribers.contains(whoClicked);
     }
 
     @Override

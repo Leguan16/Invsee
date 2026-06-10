@@ -12,7 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.Set;
@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static net.kyori.adventure.text.Component.text;
 
-public interface Session {
+public interface Session extends SessionInventory {
 
     default void addSubscriber(UUID subscriber) {
         if (subscriber == null) return;
@@ -92,8 +92,6 @@ public interface Session {
 
     void updateSubscriberInventory();
 
-    Inventory getInventory();
-
     Set<UUID> getSubscribers();
 
     void removeSubscriber(UUID subscriber);
@@ -105,4 +103,6 @@ public interface Session {
     void cache(Player player);
 
     Player getCachedPlayer();
+
+    boolean isSubscriber(@NotNull UUID whoClicked);
 }

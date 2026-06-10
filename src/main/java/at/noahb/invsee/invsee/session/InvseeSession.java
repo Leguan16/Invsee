@@ -16,6 +16,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -41,12 +43,8 @@ public class InvseeSession implements Session {
         this.uuid = offlinePlayer.getUniqueId();
         this.subscribers = new HashSet<>();
 
-        if (offlinePlayer instanceof Player player) {
-            this.inventory = Bukkit.createInventory(player, 45, player.name().append(text("'s inventory")));
-        } else {
-            String name = offlinePlayer.getName() == null ? "unknown" : offlinePlayer.getName();
-            this.inventory = InvseePlugin.getInstance().getServer().createInventory(null, 45, text(name).append(text("'s inventory")));
-        }
+        String name = offlinePlayer.getName() == null ? "unknown" : offlinePlayer.getName();
+        this.inventory = InvseePlugin.getInstance().getServer().createInventory(this, 45, text(name).append(text("'s inventory")));
 
         updateSubscriberInventory();
         addSubscriber(subscriber);
@@ -63,7 +61,7 @@ public class InvseeSession implements Session {
     }
 
     @Override
-    public Inventory getInventory() {
+    public @NonNull Inventory getInventory() {
         return this.inventory;
     }
 
@@ -153,6 +151,11 @@ public class InvseeSession implements Session {
     @Override
     public Player getCachedPlayer() {
         return this.playerCache.getIfPresent(this.uuid);
+    }
+
+    @Override
+    public boolean isSubscriber(@NotNull UUID whoClicked) {
+        return this.subscribers.contains(whoClicked);
     }
 
     @Override

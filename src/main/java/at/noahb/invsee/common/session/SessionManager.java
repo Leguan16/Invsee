@@ -5,6 +5,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -73,4 +74,12 @@ public abstract class SessionManager {
 
     protected abstract Session createSession(OfflinePlayer offlinePlayer, UUID subscriber);
 
+    public boolean isSessionInventory(Inventory inventory) {
+        return inventory instanceof SessionInventory;
+    }
+
+    public boolean isSession(@NotNull UUID whoClicked) {
+        return this.sessions.stream().anyMatch(session -> session.isSubscriber(whoClicked) ||
+                session.getUniqueIdOfObservedPlayer().equals(whoClicked));
+    }
 }

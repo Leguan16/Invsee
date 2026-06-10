@@ -14,6 +14,9 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 public record InventoryListener(InvseePlugin instance) implements Listener {
 
@@ -27,6 +30,10 @@ public record InventoryListener(InvseePlugin instance) implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         boolean setEmpty = false;
+
+        if (!isSession(event.getWhoClicked().getUniqueId())) {
+            return;
+        }
 
         if (event.getClickedInventory() != null && event.getClickedInventory().getSize() == 45 && event.getSlot() > 41) {
             event.setCancelled(true);
@@ -64,6 +71,11 @@ public record InventoryListener(InvseePlugin instance) implements Listener {
 
         if (setEmpty) event.setCurrentItem(ItemStack.empty());
         handle(event.getWhoClicked());
+    }
+
+    private boolean isSession(@NotNull UUID whoClicked) {
+        return this.instance.getInvseeSessionManager().isSession(whoClicked) ||
+                this.instance.getEnderseeSessionManager().isSession(whoClicked);
     }
 
     @EventHandler
